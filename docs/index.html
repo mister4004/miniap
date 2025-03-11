@@ -1,30 +1,929 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Football Test</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            margin: 0;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: white;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EuroStats - Трекер матчей Евро</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --accent: #f97316;
+      --bg-dark: #1f2937;
+      --bg-light: #f1f5f9;
+      --text-light: #f8fafc;
+      --text-dark: #0f172a;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      padding-bottom: 70px;
+    }
+    
+    .header {
+      background-color: var(--primary);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header h1 {
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .settings-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    
+    .date-selector {
+      display: flex;
+      overflow-x: auto;
+      padding: 10px;
+      gap: 10px;
+      background-color: var(--bg-dark);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .date-btn {
+      background: var(--primary-light);
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: bold;
+      min-width: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .date-btn.active {
+      background: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .date-btn .day {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .date-btn .date {
+      font-size: 16px;
+    }
+    
+    .matches-container {
+      padding: 16px;
+    }
+    
+    .matches-header {
+      margin-bottom: 16px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .match-card {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .match-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .match-card.highlight {
+      border-left: 4px solid var(--accent);
+    }
+    
+    .match-time {
+      font-size: 14px;
+      opacity: 0.7;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .teams {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 40%;
+    }
+    
+    .team-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    
+    .team-logo img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+    
+    .team-name {
+      font-weight: bold;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .versus {
+      font-size: 20px;
+      font-weight: bold;
+      opacity: 0.5;
+    }
+    
+    .match-venue {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 10px;
+    }
+    
+    .match-details {
+      background-color: var(--bg-dark);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .match-details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .match-details-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    
+    .match-info {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .detail-teams {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .detail-team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 40%;
+    }
+    
+    .detail-team-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    
+    .detail-team-logo img {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+    }
+    
+    .detail-team-name {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    
+    .detail-team-country {
+      font-size: 12px;
+      opacity: 0.7;
+      text-align: center;
+    }
+    
+    .match-time-big {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .action-btn {
+      background-color: var(--primary-light);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+    
+    .action-btn.odds {
+      background-color: var(--accent);
+    }
+    
+    .statistics-container, .odds-container {
+      margin-top: 20px;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    
+    .stats-table th, .stats-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stats-table th {
+      background-color: rgba(255, 255, 255, 0.05);
+      font-weight: normal;
+      opacity: 0.7;
+    }
+    
+    .result {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .win {
+      background-color: #10b981;
+    }
+    
+    .loss {
+      background-color: #ef4444;
+    }
+    
+    .draw {
+      background-color: #f59e0b;
+    }
+    
+    .odds-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    
+    .odds-card {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    
+    .odds-type {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+    
+    .odds-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 16px;
+    }
+    
+    .tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      opacity: 0.7;
+      position: relative;
+    }
+    
+    .tab.active {
+      opacity: 1;
+      font-weight: bold;
+    }
+    
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--accent);
+    }
+    
+    .navbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--primary);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px;
+      box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.7;
+      cursor: pointer;
+    }
+    
+    .nav-btn.active {
+      opacity: 1;
+      color: var(--accent);
+    }
+    
+    .nav-btn i {
+      font-size: 20px;
+    }
+    
+    .nav-btn span {
+      font-size: 12px;
+    }
+    
+    .loader {
+      width: 80px;
+      height: 20px;
+      margin: 40px auto;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .loader .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--primary-light);
+      animation: bounce 1.5s infinite ease-in-out;
+    }
+    
+    .loader .dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+    
+    .loader .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .loader .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-16px);
+      }
+    }
+    
+    .nav-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+    
+    /* Pulse Animation for Live indicator */
+    .pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-right: 6px;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+      }
+      
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+      }
+      
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+      }
+    }
+    
+    /* Button hover effects */
+    .action-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Hide match details by default */
+    #matchDetails {
+      display: none;
+    }
+    
+    /* Hide statistics and odds containers by default */
+    #statisticsContainer, #oddsContainer {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>🚀 Привет, Telegram!</h1>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        console.log('Telegram WebApp initialized!', tg.initDataUnsafe);
-    </script>
-</body>
-</html>
+  <!-- Header -->
+  <div class="header">
+    <h1><i class="fas fa-futbol"></i> EuroStats</h1>
+    <button class="settings-btn"><i class="fas fa-cog"></i></button>
+  </div>
+  
+  <!-- Date Selector -->
+  <div class="date-selector">
+    <button class="date-btn active">
+      <span class="day">Сегодня</span>
+      <span class="date">12 Мар</span>
+    </button>
+    <button class="date-btn">
+      <span class="day">Завтра</span>
+      <span class="date">13 Мар</span>
+    </button>
+    <button class="date-btn">
+      <span class="day">Послезавтра</span>
+      <span class="date">14 Мар</span>
+    </button>
+    <button class="date-btn">
+      <span class="day">Пятница</span>
+      <span class="date">15 Мар</span>
+    </button>
+    <button class="date-btn">
+      <span class="day">Суббота</span>
+      <span class="date">16 Мар</span>
+    </button>
+  </div>
+  
+  <!-- Matches List -->
+  <div id="matchesList">
+    <div class="matches-container">
+      <h2 class="matches-header">
+        <i class="fas fa-calendar-day"></i> Матчи на сегодня
+      </h2>
+      
+      <!-- Match Card -->
+      <div class="match-card highlight" onclick="showMatchDetails()">
+        <div class="match-time">
+          <i class="far fa-clock"></i> 21:45
+        </div>
+        <div class="teams">
+          <div class="team">
+            <div class="team-logo">
+              <img src="/api/placeholder/50/50" alt="Испания">
+            </div>
+            <div class="team-name">Испания</div>
+          </div>
+          <div class="versus">VS</div>
+          <div class="team">
+            <div class="team-logo">
+              <img src="/api/placeholder/50/50" alt="Германия">
+            </div>
+            <div class="team-name">Германия</div>
+          </div>
+        </div>
+        <div class="match-venue">
+          <i class="fas fa-map-marker-alt"></i> Барселона, Камп Ноу
+        </div>
+      </div>
+      
+      <!-- Match Card -->
+      <div class="match-card" onclick="showMatchDetails()">
+        <div class="match-time">
+          <i class="far fa-clock"></i> 19:00
+        </div>
+        <div class="teams">
+          <div class="team">
+            <div class="team-logo">
+              <img src="/api/placeholder/50/50" alt="Франция">
+            </div>
+            <div class="team-name">Франция</div>
+          </div>
+          <div class="versus">VS</div>
+          <div class="team">
+            <div class="team-logo">
+              <img src="/api/placeholder/50/50" alt="Италия">
+            </div>
+            <div class="team-name">Италия</div>
+          </div>
+        </div>
+        <div class="match-venue">
+          <i class="fas fa-map-marker-alt"></i> Париж, Парк де Пренс
+        </div>
+      </div>
+      
+      <!-- Live Match Card -->
+      <div class="match-card" onclick="showMatchDetails()">
+        <div class="match-time">
+          <span class="pulse"></span> Идет сейчас
+        </div>
+        <div class="teams">
+          <div class="team">
+            <div class="team-logo">
+              <img src="/api/placeholder/50/50" alt="Англия">
+            </div>
+            <div class="team-name">Англия</div>
+          </div>
+          <div class="versus">VS</div>
+          <div class="team">
+            <div class="team-logo">
+              <img src="/api/placeholder/50/50" alt="Нидерланды">
+            </div>
+            <div class="team-name">Нидерланды</div>
+          </div>
+        </div>
+        <div class="match-venue">
+          <i class="fas fa-map-marker-alt"></i> Лондон, Уэмбли
+        </div>
+      </div>
+      
+      <!-- Loader for more matches -->
+      <div class="loader">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Match Details -->
+  <div id="matchDetails" style="display:none;">
+    <div class="matches-container">
+      <div class="match-details">
+        <div class="match-details-header">
+          <div class="match-details-title">Детали матча</div>
+          <button class="close-btn" onclick="hideMatchDetails()"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="match-info">
+          <div class="detail-teams">
+            <div class="detail-team">
+              <div class="detail-team-logo">
+                <img src="/api/placeholder/80/80" alt="Испания">
+              </div>
+              <div class="detail-team-name">Испания</div>
+              <div class="detail-team-country">ESP</div>
+            </div>
+            <div class="match-time-big">
+              <div>12 Марта</div>
+              <div>21:45</div>
+            </div>
+            <div class="detail-team">
+              <div class="detail-team-logo">
+                <img src="/api/placeholder/80/80" alt="Германия">
+              </div>
+              <div class="detail-team-name">Германия</div>
+              <div class="detail-team-country">GER</div>
+            </div>
+          </div>
+          
+          <div class="match-venue">
+            <i class="fas fa-map-marker-alt"></i> Барселона, Камп Ноу
+          </div>
+          
+          <div class="action-buttons">
+            <button class="action-btn" onclick="showStatistics()">
+              <i class="fas fa-chart-bar"></i> Статистика
+            </button>
+            <button class="action-btn odds" onclick="showOdds()">
+              <i class="fas fa-coins"></i> Линия БК
+            </button>
+          </div>
+        </div>
+        
+        <!-- Statistics Container -->
+        <div id="statisticsContainer">
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab(this, 'teamStats')">Статистика команд</div>
+            <div class="tab" onclick="switchTab(this, 'h2hStats')">Личные встречи</div>
+          </div>
+          
+          <div id="teamStats">
+            <div class="section-title">
+              <i class="fas fa-trophy"></i> Последние матчи Испании
+            </div>
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Матч</th>
+                  <th>Счет</th>
+                  <th>Результат</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>10.03.25</td>
+                  <td>Испания - Хорватия</td>
+                  <td>3:1</td>
+                  <td><span class="result win">П</span></td>
+                </tr>
+                <tr>
+                  <td>05.03.25</td>
+                  <td>Португалия - Испания</td>
+                  <td>2:2</td>
+                  <td><span class="result draw">Н</span></td>
+                </tr>
+                <tr>
+                  <td>28.02.25</td>
+                  <td>Испания - Бельгия</td>
+                  <td>2:0</td>
+                  <td><span class="result win">П</span></td>
+                </tr>
+                <tr>
+                  <td>23.02.25</td>
+                  <td>Испания - Швеция</td>
+                  <td>3:0</td>
+                  <td><span class="result win">П</span></td>
+                </tr>
+                <tr>
+                  <td>18.02.25</td>
+                  <td>Польша - Испания</td>
+                  <td>1:2</td>
+                  <td><span class="result win">П</span></td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div class="section-title">
+              <i class="fas fa-trophy"></i> Последние матчи Германии
+            </div>
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Матч</th>
+                  <th>Счет</th>
+                  <th>Результат</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>08.03.25</td>
+                  <td>Германия - Швейцария</td>
+                  <td>2:1</td>
+                  <td><span class="result win">П</span></td>
+                </tr>
+                <tr>
+                  <td>03.03.25</td>
+                  <td>Франция - Германия</td>
+                  <td>2:0</td>
+                  <td><span class="result loss">П</span></td>
+                </tr>
+                <tr>
+                  <td>25.02.25</td>
+                  <td>Германия - Дания</td>
+                  <td>1:1</td>
+                  <td><span class="result draw">Н</span></td>
+                </tr>
+                <tr>
+                  <td>20.02.25</td>
+                  <td>Германия - Чехия</td>
+                  <td>3:0</td>
+                  <td><span class="result win">П</span></td>
+                </tr>
+                <tr>
+                  <td>15.02.25</td>
+                  <td>Австрия - Германия</td>
+                  <td>0:2</td>
+                  <td><span class="result win">П</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="h2hStats" style="display:none;">
+            <div class="section-title">
+              <i class="fas fa-handshake"></i> Личные встречи
+            </div>
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Матч</th>
+                  <th>Счет</th>
+                  <th>Турнир</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>15.11.24</td>
+                  <td>Германия - Испания</td>
+                  <td>1:0</td>
+                  <td>Лига Наций</td>
+                </tr>
+                <tr>
+                  <td>08.07.24</td>
+                  <td>Испания - Германия</td>
+                  <td>2:1</td>
+                  <td>ЕВРО 2024</td>
+                </tr>
+                <tr>
+                  <td>23.03.23</td>
+                  <td>Испания - Германия</td>
+                  <td>1:1</td>
+                  <td>Товарищеский</td>
+                </tr>
+                <tr>
+                  <td>18.11.22</td>
+                  <td>Германия - Испания</td>
+                  <td>0:0</td>
+                  <td>Товарищеский</td>
+                </tr>
+                <tr>
+                  <td>17.11.20</td>
+                  <td>Испания - Германия</td>
+                  <td>6:0</td>
+                  <td>Лига Наций</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Odds Container -->
+        <div id="oddsContainer">
+          <div class="section-title">
+            <i class="fas fa-coins"></i> Коэффициенты на основные исходы
+          </div>
+          
+          <div class="odds-grid">
+            <div class="odds-card">
+              <div class="odds-type">Победа 1</div>
+              <div class="odds-value">2.50</div>
+            </div>
+            <div class="odds-card">
+              <div class="odds-type">Ничья</div>
+              <div class="odds-value">3.20</div>
+            </div>
+            <div class="odds-card">
+              <div class="odds-type">Победа 2</div>
+              <div class="odds-value">2.85</div>
+            </div>
+          </div>
+          
+          <div class="section-title" style="margin-top: 16px;">
+            <i class="fas fa-futbol"></i> Голы
+          </div>
+          
+          <div class="odds-grid">
+            <div class="odds-card">
+              <div class="odds-type">ТБ 1.5</div>
+              <div class="odds-value">1.42</div>
+            </div>
+            <div class="odds-card">
+              <div class="odds-type">ТБ 2.5</div>
+              <div class="odds-value">2.05</div>
+            </div>
+            <div class="odds-card">
+              <div class="odds-type">ТМ 2.5</div>
+              <div class="odds-value">1.75</div>
+            </div>
+          </div>
+          
+          <div class="section-title" style="margin-top: 16px;">
+            <i class="fas fa-check-double"></i> Форы
+          </div>
+          
+          <div class="odds-grid">
+            <div class="odds-card">
+              <div class="odds-type">Ф1 (0)</div>
+              <div class="odds-value">1.85</div>
+            </div>
+            <div class="odds-card">
+              <div class="odds-type">Ф1 (-1)</div>
+              <div class="odds-value">3.90</div>
+            </div>
+            <div class="odds-card">
+              <div class="odds-type">Ф2 (0)</div>
+              <div class="odds-value">1.95</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bottom Navigation -->
+  <div class="navbar">
+    <button class="nav-btn active">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </button>
+    <button class="nav-btn">
+      <i class="fas fa-calendar-alt"></i>
+      <span>Календарь</span>
+    </button>
+    <button class="nav-btn">
+      <i class="fas fa-star"></i>
+      <span>Избранное</span>
+    </button>
+    <button class="nav-btn">
+      <i class="fas fa-cog"></i>
+      <span>Настройки
