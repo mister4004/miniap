@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EuroStats - Трекер матчей Евро</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <style>
     :root {
@@ -14,6 +15,10 @@
       --bg-light: #f1f5f9;
       --text-light: #f8fafc;
       --text-dark: #0f172a;
+      --tg-theme-bg-color: var(--bg-dark);
+      --tg-theme-text-color: var(--text-light);
+      --tg-theme-button-color: var(--primary-light);
+      --tg-theme-button-text-color: var(--text-light);
     }
     
     * {
@@ -528,6 +533,21 @@
     #statisticsContainer, #oddsContainer {
       display: none;
     }
+    
+    /* Telegram WebApp theme support */
+    body.telegram-app {
+      background-color: var(--tg-theme-bg-color, var(--bg-dark));
+      color: var(--tg-theme-text-color, var(--text-light));
+    }
+    
+    .telegram-app .action-btn {
+      background-color: var(--tg-theme-button-color, var(--primary-light));
+      color: var(--tg-theme-button-text-color, var(--text-light));
+    }
+    
+    .telegram-app .action-btn.odds {
+      background-color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -576,14 +596,14 @@
         <div class="teams">
           <div class="team">
             <div class="team-logo">
-              <img src="/api/placeholder/50/50" alt="Испания">
+              <img src="https://via.placeholder.com/50" alt="Испания">
             </div>
             <div class="team-name">Испания</div>
           </div>
           <div class="versus">VS</div>
           <div class="team">
             <div class="team-logo">
-              <img src="/api/placeholder/50/50" alt="Германия">
+              <img src="https://via.placeholder.com/50" alt="Германия">
             </div>
             <div class="team-name">Германия</div>
           </div>
@@ -601,14 +621,14 @@
         <div class="teams">
           <div class="team">
             <div class="team-logo">
-              <img src="/api/placeholder/50/50" alt="Франция">
+              <img src="https://via.placeholder.com/50" alt="Франция">
             </div>
             <div class="team-name">Франция</div>
           </div>
           <div class="versus">VS</div>
           <div class="team">
             <div class="team-logo">
-              <img src="/api/placeholder/50/50" alt="Италия">
+              <img src="https://via.placeholder.com/50" alt="Италия">
             </div>
             <div class="team-name">Италия</div>
           </div>
@@ -626,14 +646,14 @@
         <div class="teams">
           <div class="team">
             <div class="team-logo">
-              <img src="/api/placeholder/50/50" alt="Англия">
+              <img src="https://via.placeholder.com/50" alt="Англия">
             </div>
             <div class="team-name">Англия</div>
           </div>
           <div class="versus">VS</div>
           <div class="team">
             <div class="team-logo">
-              <img src="/api/placeholder/50/50" alt="Нидерланды">
+              <img src="https://via.placeholder.com/50" alt="Нидерланды">
             </div>
             <div class="team-name">Нидерланды</div>
           </div>
@@ -665,7 +685,7 @@
           <div class="detail-teams">
             <div class="detail-team">
               <div class="detail-team-logo">
-                <img src="/api/placeholder/80/80" alt="Испания">
+                <img src="https://via.placeholder.com/80" alt="Испания">
               </div>
               <div class="detail-team-name">Испания</div>
               <div class="detail-team-country">ESP</div>
@@ -676,7 +696,7 @@
             </div>
             <div class="detail-team">
               <div class="detail-team-logo">
-                <img src="/api/placeholder/80/80" alt="Германия">
+                <img src="https://via.placeholder.com/80" alt="Германия">
               </div>
               <div class="detail-team-name">Германия</div>
               <div class="detail-team-country">GER</div>
@@ -893,37 +913,3 @@
           
           <div class="odds-grid">
             <div class="odds-card">
-              <div class="odds-type">Ф1 (0)</div>
-              <div class="odds-value">1.85</div>
-            </div>
-            <div class="odds-card">
-              <div class="odds-type">Ф1 (-1)</div>
-              <div class="odds-value">3.90</div>
-            </div>
-            <div class="odds-card">
-              <div class="odds-type">Ф2 (0)</div>
-              <div class="odds-value">1.95</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Bottom Navigation -->
-  <div class="navbar">
-    <button class="nav-btn active">
-      <i class="fas fa-home"></i>
-      <span>Главная</span>
-    </button>
-    <button class="nav-btn">
-      <i class="fas fa-calendar-alt"></i>
-      <span>Календарь</span>
-    </button>
-    <button class="nav-btn">
-      <i class="fas fa-star"></i>
-      <span>Избранное</span>
-    </button>
-    <button class="nav-btn">
-      <i class="fas fa-cog"></i>
-      <span>Настройки
